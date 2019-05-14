@@ -1,0 +1,161 @@
+From cb19dff430b5054fafc26af947f4093ece8ec44e Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Fri, 10 May 2019 14:58:27 -0500
+Subject: [PATCH 2/4] Set some required modules to default
+
+---
+ drivers/i2c/Kconfig           | 1 +
+ drivers/i2c/algos/Kconfig     | 1 +
+ drivers/leds/Kconfig          | 2 ++
+ drivers/media/Kconfig         | 1 +
+ drivers/media/usb/uvc/Kconfig | 1 +
+ sound/Kconfig                 | 4 +++-
+ sound/core/Kconfig            | 3 +++
+ sound/core/Makefile           | 4 ++--
+ 8 files changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/i2c/Kconfig b/drivers/i2c/Kconfig
+index e380c6e..838f560 100644
+--- a/drivers/i2c/Kconfig
++++ b/drivers/i2c/Kconfig
+@@ -48,6 +48,7 @@ config I2C_CHARDEV
+ 
+ config I2C_MUX
+ 	tristate "I2C bus multiplexing support"
++	default m
+ 	depends on HAS_IOMEM
+ 	help
+ 	  Say Y here if you want the I2C core to support the ability to
+diff --git a/drivers/i2c/algos/Kconfig b/drivers/i2c/algos/Kconfig
+index f1cfe7e..9b5a615 100644
+--- a/drivers/i2c/algos/Kconfig
++++ b/drivers/i2c/algos/Kconfig
+@@ -7,6 +7,7 @@ menu "I2C Algorithms"
+ 
+ config I2C_ALGOBIT
+ 	tristate "I2C bit-banging interfaces"
++	default m
+ 
+ config I2C_ALGOPCF
+ 	tristate "I2C PCF 8584 interfaces"
+diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
+index ef99229..d6b41a7 100644
+--- a/drivers/leds/Kconfig
++++ b/drivers/leds/Kconfig
+@@ -7,6 +7,7 @@ config LEDS_GPIO_REGISTER
+ 
+ menuconfig NEW_LEDS
+ 	bool "LED Support"
++	default y
+ 	help
+ 	  Say Y to enable Linux LED support.  This allows control of supported
+ 	  LEDs from both userspace and optionally, by kernel events (triggers).
+@@ -18,6 +19,7 @@ if NEW_LEDS
+ 
+ config LEDS_CLASS
+ 	tristate "LED Class Support"
++	default m
+ 	help
+ 	  This option enables the led sysfs class in /sys/class/leds.  You'll
+ 	  need this to do anything useful with LEDs.  If unsure, say N.
+diff --git a/drivers/media/Kconfig b/drivers/media/Kconfig
+index 8270388..152df6d 100644
+--- a/drivers/media/Kconfig
++++ b/drivers/media/Kconfig
+@@ -5,6 +5,7 @@
+ menuconfig MEDIA_SUPPORT
+ 	tristate "Multimedia support"
+ 	depends on HAS_IOMEM
++	default m
+ 	help
+ 	  If you want to use Webcams, Video grabber devices and/or TV devices
+ 	  enable this option and other options below.
+diff --git a/drivers/media/usb/uvc/Kconfig b/drivers/media/usb/uvc/Kconfig
+index 541c9f1..d85ba1a 100644
+--- a/drivers/media/usb/uvc/Kconfig
++++ b/drivers/media/usb/uvc/Kconfig
+@@ -1,5 +1,6 @@
+ config USB_VIDEO_CLASS
+ 	tristate "USB Video Class (UVC)"
++	default m
+ 	select VIDEOBUF2_VMALLOC
+ 	---help---
+ 	  Support for the USB Video Class (UVC).  Currently only video
+diff --git a/sound/Kconfig b/sound/Kconfig
+index c710ce2..d891042 100644
+--- a/sound/Kconfig
++++ b/sound/Kconfig
+@@ -1,6 +1,7 @@
+ menuconfig SOUND
+ 	tristate "Sound card support"
+ 	depends on HAS_IOMEM
++	default m
+ 	help
+ 	  If you have a sound card in your computer, i.e. if it can say more
+ 	  than an occasional beep, say Y.  Be sure to have all the information
+@@ -27,7 +28,7 @@ if SOUND
+ 
+ config SOUND_OSS_CORE
+ 	bool
+-	default n
++	default m
+ 
+ config SOUND_OSS_CORE_PRECLAIM
+ 	bool "Preclaim OSS device numbers"
+@@ -60,6 +61,7 @@ if !M68K && !UML
+ 
+ menuconfig SND
+ 	tristate "Advanced Linux Sound Architecture"
++	default m
+ 	help
+ 	  Say 'Y' or 'M' to enable ALSA (Advanced Linux Sound Architecture),
+ 	  the new base sound system.
+diff --git a/sound/core/Kconfig b/sound/core/Kconfig
+index b413ed0..97200cb 100644
+--- a/sound/core/Kconfig
++++ b/sound/core/Kconfig
+@@ -1,9 +1,11 @@
+ # ALSA soundcard-configuration
+ config SND_TIMER
+ 	tristate
++	default m
+ 
+ config SND_PCM
+ 	tristate
++	default m
+ 	select SND_TIMER
+ 
+ config SND_HWDEP
+@@ -23,6 +25,7 @@ config SND_JACK
+ 
+ config SND_SEQUENCER
+ 	tristate "Sequencer support"
++	default m
+ 	select SND_TIMER
+ 	help
+ 	  Say Y or M to enable MIDI sequencer and router support.  This
+diff --git a/sound/core/Makefile b/sound/core/Makefile
+index 43d4117..3b341c4 100644
+--- a/sound/core/Makefile
++++ b/sound/core/Makefile
+@@ -13,7 +13,7 @@ snd-$(CONFIG_SND_JACK)	  += jack.o
+ snd-pcm-objs := pcm.o pcm_native.o pcm_lib.o pcm_timer.o pcm_misc.o \
+ 		pcm_memory.o
+ 
+-snd-page-alloc-y := memalloc.o
++#snd-page-alloc-y := memalloc.o
+ snd-page-alloc-$(CONFIG_SND_DMA_SGBUF) += sgbuf.o
+ 
+ snd-rawmidi-objs  := rawmidi.o
+@@ -29,7 +29,7 @@ obj-$(CONFIG_SND_HWDEP)		+= snd-hwdep.o
+ obj-$(CONFIG_SND_TIMER)		+= snd-timer.o
+ obj-$(CONFIG_SND_HRTIMER)	+= snd-hrtimer.o
+ obj-$(CONFIG_SND_RTCTIMER)	+= snd-rtctimer.o
+-obj-$(CONFIG_SND_PCM)		+= snd-pcm.o snd-page-alloc.o
++obj-$(CONFIG_SND_PCM)		+= snd-pcm.o memalloc.o #snd-page-alloc.o
+ obj-$(CONFIG_SND_RAWMIDI)	+= snd-rawmidi.o
+ 
+ obj-$(CONFIG_SND_OSSEMUL)	+= oss/
+-- 
+2.7.4
+

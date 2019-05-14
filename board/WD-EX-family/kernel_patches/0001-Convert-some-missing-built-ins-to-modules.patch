@@ -1,0 +1,209 @@
+From c4ee7b4ed453e589c06387a281ddcaf2e5e555be Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Fri, 10 May 2019 14:58:05 -0500
+Subject: [PATCH 1/4] Convert some missing built-ins to modules
+
+---
+ drivers/base/Kconfig                  |  4 ++--
+ drivers/base/dma-buf.c                | 10 ++++++++--
+ drivers/base/regmap/Kconfig           |  5 +++--
+ drivers/base/regmap/Makefile          |  7 +++++--
+ drivers/base/regmap/regcache-flat.c   |  2 ++
+ drivers/base/regmap/regcache-lzo.c    |  2 ++
+ drivers/base/regmap/regcache-rbtree.c |  2 ++
+ drivers/base/regmap/regcache.c        | 10 ++++++++++
+ drivers/base/regmap/regmap.c          |  9 +++++++++
+ drivers/base/regmap/regmap_module.c   |  1 +
+ include/linux/regmap.h                |  4 ++++
+ 11 files changed, 48 insertions(+), 8 deletions(-)
+ create mode 120000 drivers/base/regmap/regmap_module.c
+
+diff --git a/drivers/base/Kconfig b/drivers/base/Kconfig
+index 07abd9d..de95dfe 100644
+--- a/drivers/base/Kconfig
++++ b/drivers/base/Kconfig
+@@ -193,8 +193,8 @@ config SOC_BUS
+ source "drivers/base/regmap/Kconfig"
+ 
+ config DMA_SHARED_BUFFER
+-	bool
+-	default n
++	tristate
++	default m
+ 	select ANON_INODES
+ 	help
+ 	  This option enables the framework for buffer-sharing between
+diff --git a/drivers/base/dma-buf.c b/drivers/base/dma-buf.c
+index 08fe897..9918b98 100644
+--- a/drivers/base/dma-buf.c
++++ b/drivers/base/dma-buf.c
+@@ -29,6 +29,7 @@
+ #include <linux/export.h>
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
++#include <linux/module.h>
+ 
+ static inline int is_dma_buf_file(struct file *);
+ 
+@@ -702,10 +703,15 @@ static int __init dma_buf_init(void)
+ 	dma_buf_init_debugfs();
+ 	return 0;
+ }
+-subsys_initcall(dma_buf_init);
++
++//subsys_initcall(dma_buf_init);
++module_init(dma_buf_init);
+ 
+ static void __exit dma_buf_deinit(void)
+ {
+ 	dma_buf_uninit_debugfs();
+ }
+-__exitcall(dma_buf_deinit);
++//__exitcall(dma_buf_deinit);
++module_exit(dma_buf_deinit);
++
++MODULE_LICENSE("GPL");
+diff --git a/drivers/base/regmap/Kconfig b/drivers/base/regmap/Kconfig
+index f0d3054..2117d5d 100644
+--- a/drivers/base/regmap/Kconfig
++++ b/drivers/base/regmap/Kconfig
+@@ -3,14 +3,15 @@
+ # subsystems should select the appropriate symbols.
+ 
+ config REGMAP
+-	default y if (REGMAP_I2C || REGMAP_SPI || REGMAP_MMIO || REGMAP_IRQ)
++	default m if (REGMAP_I2C || REGMAP_SPI || REGMAP_MMIO || REGMAP_IRQ)
+ 	select LZO_COMPRESS
+ 	select LZO_DECOMPRESS
+ 	select IRQ_DOMAIN if REGMAP_IRQ
+-	bool
++	tristate
+ 
+ config REGMAP_I2C
+ 	tristate
++	default m
+ 
+ config REGMAP_SPI
+ 	tristate
+diff --git a/drivers/base/regmap/Makefile b/drivers/base/regmap/Makefile
+index cf12998..a4ed711 100644
+--- a/drivers/base/regmap/Makefile
++++ b/drivers/base/regmap/Makefile
+@@ -1,7 +1,10 @@
+-obj-$(CONFIG_REGMAP) += regmap.o regcache.o
+-obj-$(CONFIG_REGMAP) += regcache-rbtree.o regcache-lzo.o regcache-flat.o
++#obj-m += regcache.o
++obj-m += regmap_module.o
++#obj-m += regcache-rbtree.o regcache-lzo.o regcache-flat.o
+ obj-$(CONFIG_DEBUG_FS) += regmap-debugfs.o
+ obj-$(CONFIG_REGMAP_I2C) += regmap-i2c.o
+ obj-$(CONFIG_REGMAP_SPI) += regmap-spi.o
+ obj-$(CONFIG_REGMAP_MMIO) += regmap-mmio.o
+ obj-$(CONFIG_REGMAP_IRQ) += regmap-irq.o
++
++regmap_module-objs += regmap.o regcache.o regcache-rbtree.o regcache-lzo.o regcache-flat.o
+diff --git a/drivers/base/regmap/regcache-flat.c b/drivers/base/regmap/regcache-flat.c
+index d9762e4..0b285fa 100644
+--- a/drivers/base/regmap/regcache-flat.c
++++ b/drivers/base/regmap/regcache-flat.c
+@@ -70,3 +70,5 @@ struct regcache_ops regcache_flat_ops = {
+ 	.read = regcache_flat_read,
+ 	.write = regcache_flat_write,
+ };
++
++EXPORT_SYMBOL_GPL(regcache_flat_ops);
+diff --git a/drivers/base/regmap/regcache-lzo.c b/drivers/base/regmap/regcache-lzo.c
+index e210a6d..8198c7b 100644
+--- a/drivers/base/regmap/regcache-lzo.c
++++ b/drivers/base/regmap/regcache-lzo.c
+@@ -376,3 +376,5 @@ struct regcache_ops regcache_lzo_ops = {
+ 	.write = regcache_lzo_write,
+ 	.sync = regcache_lzo_sync
+ };
++
++EXPORT_SYMBOL_GPL(regcache_lzo_ops);
+diff --git a/drivers/base/regmap/regcache-rbtree.c b/drivers/base/regmap/regcache-rbtree.c
+index bb8c3bb..fe80c75 100644
+--- a/drivers/base/regmap/regcache-rbtree.c
++++ b/drivers/base/regmap/regcache-rbtree.c
+@@ -424,3 +424,5 @@ struct regcache_ops regcache_rbtree_ops = {
+ 	.write = regcache_rbtree_write,
+ 	.sync = regcache_rbtree_sync
+ };
++
++EXPORT_SYMBOL_GPL(regcache_rbtree_ops);
+diff --git a/drivers/base/regmap/regcache.c b/drivers/base/regmap/regcache.c
+index 46283fd..d210ef0 100644
+--- a/drivers/base/regmap/regcache.c
++++ b/drivers/base/regmap/regcache.c
+@@ -659,3 +659,13 @@ int regcache_sync_block(struct regmap *map, void *block,
+ 		return regcache_sync_block_single(map, block, block_base,
+ 						  start, end);
+ }
++
++EXPORT_SYMBOL_GPL(regcache_init);
++EXPORT_SYMBOL_GPL(regcache_exit);
++EXPORT_SYMBOL_GPL(regcache_write);
++EXPORT_SYMBOL_GPL(regcache_read);
++EXPORT_SYMBOL_GPL(regcache_get_val);
++EXPORT_SYMBOL_GPL(regcache_set_val);
++EXPORT_SYMBOL_GPL(regcache_set_reg_present);
++EXPORT_SYMBOL_GPL(regcache_sync_block);
++EXPORT_SYMBOL_GPL(regcache_lookup_reg);
+diff --git a/drivers/base/regmap/regmap.c b/drivers/base/regmap/regmap.c
+index d0c81d1..7459beb 100644
+--- a/drivers/base/regmap/regmap.c
++++ b/drivers/base/regmap/regmap.c
+@@ -17,6 +17,7 @@
+ #include <linux/err.h>
+ #include <linux/rbtree.h>
+ #include <linux/sched.h>
++#include <linux/module.h>
+ 
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/regmap.h>
+@@ -1815,3 +1816,11 @@ static int __init regmap_initcall(void)
+ 	return 0;
+ }
+ postcore_initcall(regmap_initcall);
++
++EXPORT_SYMBOL_GPL(regmap_writeable);
++EXPORT_SYMBOL_GPL(regmap_volatile);
++EXPORT_SYMBOL_GPL(_regmap_write);
++EXPORT_SYMBOL_GPL(_regmap_raw_write);
++
++MODULE_LICENSE("GPL");
++
+diff --git a/drivers/base/regmap/regmap_module.c b/drivers/base/regmap/regmap_module.c
+new file mode 120000
+index 0000000..aace5fe
+--- /dev/null
++++ b/drivers/base/regmap/regmap_module.c
+@@ -0,0 +1 @@
++regmap.c
+\ No newline at end of file
+diff --git a/include/linux/regmap.h b/include/linux/regmap.h
+index 98c470c..a5b34f0 100644
+--- a/include/linux/regmap.h
++++ b/include/linux/regmap.h
+@@ -47,6 +47,9 @@ struct reg_default {
+ 	unsigned int def;
+ };
+ 
++#ifndef CONFIG_REGMAP
++#define CONFIG_REGMAP
++#endif
+ #ifdef CONFIG_REGMAP
+ 
+ enum regmap_endian {
+@@ -57,6 +60,7 @@ enum regmap_endian {
+ 	REGMAP_ENDIAN_NATIVE,
+ };
+ 
++
+ /**
+  * A register range, used for access related checks
+  * (readable/writeable/volatile/precious checks)
+-- 
+2.7.4
+
