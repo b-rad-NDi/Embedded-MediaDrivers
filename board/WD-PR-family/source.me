@@ -1,0 +1,323 @@
+# vim: set filetype=sh:
+
+cflags_prepend() {
+	[ ! -z "$@" ] && BASE_CFLAGS="$@ ${BASE_CFLAGS}"
+}
+
+cflags_append() {
+	[ ! -z "$@" ] && BASE_CFLAGS="${BASE_CFLAGS} $@"
+}
+
+#
+# cflags_filter() - remove inputed arguments from cflags
+#
+# This will not modify original CFLAGS, but output the filtering result.
+# You should assign yourself. i.e:
+#
+# CFLAGS="$(cflags_filter xxx)"
+#
+cflags_filter() {
+	local oflags="${CFLAGS}"
+
+	for i in "$@"; do
+		oflags=$(echo -n ${oflags} | sed "s/${i}//g" | awk '$1=$1')
+	done
+
+	echo "$oflags"
+}
+
+cflags_filter_inclusion() {
+	cflags_filter "-I[^ ]*"
+}
+
+strlen() {
+	local i;
+	for i in "$@"; do
+		echo ${#i}
+	done
+}
+
+show_features() {
+	local i len;
+	echo ""
+	echo "Features of \"${PROJECT_NAME}\" are:"
+	echo ""
+	for i in ${BASE_CFLAGS}; do
+		if [[ $i == -DPROJECT_FEATURE_BAYS=* ]]; then
+			printf " + %-24s (%s)\n" "${i:23} Bay(s)" "${i}"
+			printf "   %-24s (%s)\n" " " "-DPROJECT_FEATURE_BAYS_${i:23}=1"
+		elif [[ $i == -DPROJECT_FEATURE_BAYS_* ]]; then
+			continue
+		elif [[ $i == -DPROJECT_FEATURE_* ]]; then
+			len=$(strlen "${i:18}")
+			let len=len-2
+			printf " + %-24s (%s)\n" "${i:18:len}" "${i}"
+		fi
+	done
+	echo ""
+}
+
+has_feature() {
+	local i len;
+	for i in ${BASE_CFLAGS}; do
+		case "$i" in
+		-DPROJECT_FEATURE_*)
+			len=$(strlen "${i:18}")
+			let len=len-2
+			if [[ "$1" == "${i:18:len}" ]]; then
+				echo "Yes"
+				return
+			fi
+		;;
+		esac
+	done
+
+	echo "No"
+}
+
+feature_get_value() {
+	local i len;
+	for i in ${BASE_CFLAGS}; do
+		len=$(strlen "$1")
+		if [[ "$1" == "${i:18:len}" ]]; then
+			let len=18+len+1
+			echo "${i:len}"
+			return
+		fi
+	done
+}
+
+feature_get_value_simple_string() {
+	echo $(feature_get_value "$1") | sed -e 's:\\"::g'
+}
+
+export -f strlen
+export -f has_feature
+export -f feature_get_value
+export -f feature_get_value_simple_string
+export -f cflags_filter
+export -f cflags_filter_inclusion
+
+
+unset WORKDIR
+unset ARCH
+unset TARGET_HOST
+unset ROOTDIR
+
+if [ "${ORIG_PATH}" == "" ]; then
+        export ORIG_PATH="${PATH}"
+else
+        export PATH="${ORIG_PATH}"
+        unset ORIG_PATH
+        export ORIG_PATH="${PATH}"
+fi
+
+unset CROSS_COMPILE
+unset CC
+unset CXX
+unset AS
+unset AR
+unset LD
+unset NM
+unset RANLIB
+unset STRIP
+unset MY_PREFIX
+unset ROOT_FS
+unset XLIB_DIR
+unset XINC_DIR
+unset PROJECT_NAME
+unset CODE_NAME
+unset HOME_DIR
+unset BASE_CFLAGS
+unset FULL_CFLAGS
+
+
+export WORKDIR=$PWD
+export HOME_DIR=$PWD/..
+PATH=${WORKDIR}/x86_64-intel-linux-gnu/bin/:$PATH
+export PATH
+
+export ARCH=x86_64
+export CROSS_COMPILE="x86_64-intel-linux-gnu-"
+export CODE_NAME=BlackCanyon
+
+export CC=${CROSS_COMPILE}gcc
+export CXX=${CROSS_COMPILE}g++
+export AS=${CROSS_COMPILE}as
+export AR=${CROSS_COMPILE}ar
+export LD=${CROSS_COMPILE}ld
+export NM=${CROSS_COMPILE}nm
+export RANLIB=${CROSS_COMPILE}ranlib
+export STRIP=${CROSS_COMPILE}strip
+
+export TARGET_HOST=${CROSS_COMPILE%-}
+
+export PROJECT_NAME=WDMyCloud
+export ROOTDIR=${HOME_DIR}/firmware
+export MODULE_DIR=${ROOTDIR}/module
+export ROOT_FS=${MODULE_DIR}/crfs
+export MY_PREFIX=$PWD/../Open_Source_packages/_xinstall/$PROJECT_NAME
+export XLIB_DIR=${MY_PREFIX}
+export XINC_DIR=${MY_PREFIX}
+
+UNDERLINE_PRJ_NAME="$(echo $PROJECT_NAME | sed 's/-/_/g')"
+
+BASE_CFLAGS="-DPROJECT_NAME=\\\"${PROJECT_NAME}\\\" -DPROJECT_${UNDERLINE_PRJ_NAME}=1 -D${UNDERLINE_PRJ_NAME}=1 -DALPHA_CUSTOMIZE=1 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -           D_FILE_OFFSET_BITS=64"
+
+FULL_LDFLAGS="-L${XLIB_DIR}"
+
+#
+# ADD THE PROJECT FEATURES BELOW
+#
+# Please use Tab for indentation.
+#
+
+case "${CODE_NAME}" in
+
+BlackCanyon)
+	cflags_append "-march=atom"
+	cflags_append "-mtune=atom"
+	cflags_append "-DPROJECT_FEATURE_UNIC=1"
+	cflags_append "-DPROJECT_FEATURE_CUSTOM_WD=1"
+	cflags_append "-DRFC3339_TIMESTAMP=1"
+	cflags_append "-DPROJECT_FEATURE_BAYS=4"
+	cflags_append "-DPROJECT_FEATURE_BAYS_4=1"
+	cflags_append "-DPROJECT_FEATURE_VOLUME_ENCRYPTION=1"
+	cflags_append "-DPROJECT_FEATURE_IPV6=1"
+	cflags_append "-DPROJECT_FEATURE_VLAN=1"
+	cflags_append "-DPROJECT_FEATURE_BONDING=1"
+	cflags_append "-DPROJECT_FEATURE_OLED=1"
+	cflags_append "-DPROJECT_FEATURE_SNMP=1"
+	cflags_append "-DPROJECT_FEATURE_LAN_PORT=2"
+	cflags_append "-DPROJECT_FEATURE_LAN_PORTS_2=1"
+#	cflags_append "-DPROJECT_FEATURE_LAN_PORT_SWITCH=1"
+#	cflags_append "-DPROJECT_FEATURE_BURN_IN_uP=1"
+	cflags_append "-DPROJECT_FEATURE_UART_CMD_AUTO_POWER_RECOVERY=1"
+	cflags_append "-DPROJECT_FEATURE_SCHEDULE_POWER_ON=1"
+	cflags_append "-DPROJECT_FEATURE_MYPHOTO=1"
+	cflags_append "-DPROJECT_FEATURE_MYMUSIC=1"
+	cflags_append "-DPROJECT_FEATURE_MYSQL=1"
+	cflags_append "-DPROJECT_FEATURE_ADS=1"
+	cflags_append "-DPROJECT_FEATURE_CONFIG_FILESYSTEM=\\\"EXT4\\\""
+	cflags_append "-DPROJECT_FEATURE_CHIP_INTEL=1"
+	cflags_append "-DPROJECT_FEATURE_REMOVE_REBOOT=1"
+	cflags_append "-DPROJECT_FEATURE_ADDONS=1"
+	cflags_append "-DPROJECT_FEATURE_USBMOUNT_C_CODE=1"
+	cflags_append "-DPROJECT_FEATURE_SMARTTEST_ARG_NO_MARVELL=1"
+	cflags_append "-DPROJECT_FEATURE_UPDATE_FIRMWARE_FROM_USB=1"
+	cflags_append "-DPROJECT_FEATURE_ALERT_MESSAGE=1"
+	cflags_append "-DPROJECT_FEATURE_WRITE_KEY_SERIAL=1"
+	cflags_append "-DPROJECT_FEATURE_UNLOCKING_USB=1"
+	cflags_append "-DPROJECT_FEATURE_SSH_PASSWORD=1"
+	cflags_append "-DPROJECT_FEATURE_USB_SHARE_PRODUCT_NAME=1"
+	# support WD hard disk drive white list
+	cflags_append "-DPROJECT_FEATURE_HDD_WHITE_LIST=1"
+	# to avoid STD -> RAID1 mimgration issue, just format DISK_CAPACITY - 16MB
+	cflags_append "-DPROJECT_FEATURE_NO_FORMAT_ENTIRE_VOLUME=1"
+	# In new kernel(4.1.13), RAID5 volume formatting may hang in linux RAID5 driver if "sync" called frequently.
+	cflags_append "-DPROJECT_FEATURE_FORMAT_WITHOUT_SYNC=1"
+	# in WD projects, all size information displayed on UI in GB.
+	# so modify argument "-s, --vol-size" of diskmgr from GiB(1024 base) to GB(1000 base)
+	cflags_append "-DPROJECT_FEATURE_DISKMGR_FORMATTING_SIZE_IN_GB_NOT_GiB=1"
+	cflags_append "-DPROJECT_FEATURE_ISCSI=1"
+	cflags_append "-DPROJECT_FEATURE_VIRTUAL_VOLUME=1"
+	cflags_append "-DPROJECT_FEATURE_SQUASHFS_XZ=1"
+	cflags_append "-DPROJECT_FEATURE_AFP_RECYCLE_BIN=1"
+	cflags_append "-DPROJECT_FEATURE_SCSI_PATH=1"
+	cflags_append "-DPROJECT_FEATURE_USE_WD_HWLIB=1"
+	cflags_append "-DPROJECT_FEATURE_ROOTFS_ON_EMMC=1"
+	cflags_append "-DPROJECT_FEATURE_MACADDRS_IN_PHY=1"
+	cflags_append "-DPROJECT_FEATURE_HWCLOCK=1"
+	cflags_append "-DPROJECT_FEATURE_ACPI=1"
+	cflags_append "-DPROJECT_FEATURE_GRUB=1"
+	cflags_append "-DPROJECT_FEATURE_UPDATE_GRUB=1"
+	cflags_append "-DPROJECT_FEATURE_RAMDISK_CPIO=1"
+	cflags_append "-DPROJECT_FEATURE_64BIT_PLATFORM=1"
+	cflags_append "-DPROJECT_FEATURE_TWO_POWER_CHECK_LOST=1"
+	cflags_append "-DPROJECT_FEATURE_WAKE_ON_LAN=1"
+	cflags_append "-DPROJECT_FEATURE_SCSI_CHANNEL_MAP=1"
+	cflags_append "-DPROJECT_FEATURE_CPU_CORE=2"
+	cflags_append "-DPROJECT_FEATURE_DOCKER=1"
+	cflags_append "-DPROJECT_FEATURE_MOUNT_EXT4_BARRIER0=1"
+	cflags_append "-DPROJECT_FEATURE_SAVE_CONFIG_TYPE=1"
+#	cflags_append "-DPROJECT_FEATURE_DEVELOP_STAGE=1"
+	;;
+BryceCanyon)
+	cflags_append "-march=atom"
+	cflags_append "-mtune=atom"
+	cflags_append "-DPROJECT_FEATURE_UNIC=1"
+	cflags_append "-DPROJECT_FEATURE_CUSTOM_WD=1"
+	cflags_append "-DRFC3339_TIMESTAMP=1"
+	cflags_append "-DPROJECT_FEATURE_BAYS=2"
+	cflags_append "-DPROJECT_FEATURE_BAYS_2=1"
+	cflags_append "-DPROJECT_FEATURE_VOLUME_ENCRYPTION=1"
+	cflags_append "-DPROJECT_FEATURE_IPV6=1"
+	cflags_append "-DPROJECT_FEATURE_VLAN=1"
+	cflags_append "-DPROJECT_FEATURE_BONDING=1"
+	cflags_append "-DPROJECT_FEATURE_SNMP=1"
+	cflags_append "-DPROJECT_FEATURE_LAN_PORT=2"
+	cflags_append "-DPROJECT_FEATURE_LAN_PORTS_2=1"
+#	cflags_append "-DPROJECT_FEATURE_BURN_IN_uP=1"
+	cflags_append "-DPROJECT_FEATURE_UART_CMD_AUTO_POWER_RECOVERY=1"
+	cflags_append "-DPROJECT_FEATURE_SCHEDULE_POWER_ON=1"
+	cflags_append "-DPROJECT_FEATURE_MYPHOTO=1"
+	cflags_append "-DPROJECT_FEATURE_MYMUSIC=1"
+	cflags_append "-DPROJECT_FEATURE_MYSQL=1"
+	cflags_append "-DPROJECT_FEATURE_ADS=1"
+	cflags_append "-DPROJECT_FEATURE_CONFIG_FILESYSTEM=\\\"EXT4\\\""
+	cflags_append "-DPROJECT_FEATURE_CHIP_INTEL=1"
+	cflags_append "-DPROJECT_FEATURE_REMOVE_REBOOT=1"
+	cflags_append "-DPROJECT_FEATURE_ADDONS=1"
+	cflags_append "-DPROJECT_FEATURE_USBMOUNT_C_CODE=1"
+	cflags_append "-DPROJECT_FEATURE_SMARTTEST_ARG_NO_MARVELL=1"
+	cflags_append "-DPROJECT_FEATURE_UPDATE_FIRMWARE_FROM_USB=1"
+	cflags_append "-DPROJECT_FEATURE_ALERT_MESSAGE=1"
+	cflags_append "-DPROJECT_FEATURE_WRITE_KEY_SERIAL=1"
+	cflags_append "-DPROJECT_FEATURE_UNLOCKING_USB=1"
+	cflags_append "-DPROJECT_FEATURE_SSH_PASSWORD=1"
+	cflags_append "-DPROJECT_FEATURE_USB_SHARE_PRODUCT_NAME=1"
+	# support WD hard disk drive white list
+	cflags_append "-DPROJECT_FEATURE_HDD_WHITE_LIST=1"
+	# to avoid STD -> RAID1 mimgration issue, just format DISK_CAPACITY - 16MB
+	cflags_append "-DPROJECT_FEATURE_NO_FORMAT_ENTIRE_VOLUME=1"
+	# In new kernel(4.1.13), RAID5 volume formatting may hang in linux RAID5 driver if "sync" called frequently.
+	cflags_append "-DPROJECT_FEATURE_FORMAT_WITHOUT_SYNC=1"
+	# in WD projects, all size information displayed on UI in GB.
+	# so modify argument "-s, --vol-size" of diskmgr from GiB(1024 base) to GB(1000 base)
+	cflags_append "-DPROJECT_FEATURE_DISKMGR_FORMATTING_SIZE_IN_GB_NOT_GiB=1"
+	cflags_append "-DPROJECT_FEATURE_ISCSI=1"
+	cflags_append "-DPROJECT_FEATURE_VIRTUAL_VOLUME=1"
+	cflags_append "-DPROJECT_FEATURE_SQUASHFS_XZ=1"
+	cflags_append "-DPROJECT_FEATURE_AFP_RECYCLE_BIN=1"
+	cflags_append "-DPROJECT_FEATURE_SCSI_PATH=1"
+	cflags_append "-DPROJECT_FEATURE_USE_WD_HWLIB=1"
+	cflags_append "-DPROJECT_FEATURE_ROOTFS_ON_EMMC=1"
+	cflags_append "-DPROJECT_FEATURE_MACADDRS_IN_PHY=1"
+	cflags_append "-DPROJECT_FEATURE_HWCLOCK=1"
+	cflags_append "-DPROJECT_FEATURE_ACPI=1"
+	cflags_append "-DPROJECT_FEATURE_GRUB=1"
+	cflags_append "-DPROJECT_FEATURE_UPDATE_GRUB=1"
+	cflags_append "-DPROJECT_FEATURE_RAMDISK_CPIO=1"
+	cflags_append "-DPROJECT_FEATURE_64BIT_PLATFORM=1"
+	cflags_append "-DPROJECT_FEATURE_TWO_POWER_CHECK_LOST=1"
+	cflags_append "-DPROJECT_FEATURE_WAKE_ON_LAN=1"
+	cflags_append "-DPROJECT_FEATURE_SCSI_CHANNEL_MAP=1"
+	cflags_append "-DPROJECT_FEATURE_CPU_CORE=2"
+	cflags_append "-DPROJECT_FEATURE_DOCKER=1"
+	cflags_append "-DPROJECT_FEATURE_MOUNT_EXT4_BARRIER0=1"
+	cflags_append "-DPROJECT_FEATURE_SAVE_CONFIG_TYPE=1"
+#	cflags_append "-DPROJECT_FEATURE_DEVELOP_STAGE=1"
+	;;		
+esac
+
+FULL_CFLAGS="${BASE_CFLAGS} -I${XINC_DIR}"
+FULL_CFLAGS="${FULL_CFLAGS} -I${XINC_DIR}/openssl-1.0.1c -I${XINC_DIR}/sqlite-3.7.17"
+FULL_CFLAGS="${FULL_CFLAGS} -I${XINC_DIR}/curl-64bit"
+
+export BASE_CFLAGS
+export CFLAGS="${FULL_CFLAGS}"
+export CXXFLAGS="${CFLAGS}"
+export LDFLAGS="${FULL_LDFLAGS}"
+
+export UNIC_ENV_MODE="module"
+

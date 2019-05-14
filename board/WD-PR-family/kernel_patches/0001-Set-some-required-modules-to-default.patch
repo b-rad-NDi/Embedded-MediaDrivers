@@ -1,0 +1,150 @@
+From 7d029ef4d59970765bd7a8613b2a1d252d5aee20 Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Tue, 14 May 2019 15:54:48 -0500
+Subject: [PATCH 1/3] Set some required modules to default
+
+---
+ drivers/base/regmap/Kconfig   | 1 +
+ drivers/i2c/Kconfig           | 1 +
+ drivers/i2c/algos/Kconfig     | 1 +
+ drivers/leds/Kconfig          | 2 ++
+ drivers/media/Kconfig         | 1 +
+ drivers/media/usb/uvc/Kconfig | 1 +
+ sound/Kconfig                 | 4 +++-
+ sound/core/Kconfig            | 3 +++
+ 8 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/base/regmap/Kconfig b/drivers/base/regmap/Kconfig
+index db9d00c..55ad1a9 100644
+--- a/drivers/base/regmap/Kconfig
++++ b/drivers/base/regmap/Kconfig
+@@ -14,6 +14,7 @@ config REGMAP_AC97
+ 
+ config REGMAP_I2C
+ 	tristate
++	default m
+ 	depends on I2C
+ 
+ config REGMAP_SPI
+diff --git a/drivers/i2c/Kconfig b/drivers/i2c/Kconfig
+index 78fbee4..af41970 100644
+--- a/drivers/i2c/Kconfig
++++ b/drivers/i2c/Kconfig
+@@ -59,6 +59,7 @@ config I2C_CHARDEV
+ 
+ config I2C_MUX
+ 	tristate "I2C bus multiplexing support"
++	default m
+ 	depends on HAS_IOMEM
+ 	help
+ 	  Say Y here if you want the I2C core to support the ability to
+diff --git a/drivers/i2c/algos/Kconfig b/drivers/i2c/algos/Kconfig
+index f1cfe7e..9b5a615 100644
+--- a/drivers/i2c/algos/Kconfig
++++ b/drivers/i2c/algos/Kconfig
+@@ -7,6 +7,7 @@ menu "I2C Algorithms"
+ 
+ config I2C_ALGOBIT
+ 	tristate "I2C bit-banging interfaces"
++	default m
+ 
+ config I2C_ALGOPCF
+ 	tristate "I2C PCF 8584 interfaces"
+diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
+index 966b960..4c83455 100644
+--- a/drivers/leds/Kconfig
++++ b/drivers/leds/Kconfig
+@@ -7,6 +7,7 @@ config LEDS_GPIO_REGISTER
+ 
+ menuconfig NEW_LEDS
+ 	bool "LED Support"
++	default y
+ 	help
+ 	  Say Y to enable Linux LED support.  This allows control of supported
+ 	  LEDs from both userspace and optionally, by kernel events (triggers).
+@@ -18,6 +19,7 @@ if NEW_LEDS
+ 
+ config LEDS_CLASS
+ 	tristate "LED Class Support"
++	default m
+ 	help
+ 	  This option enables the led sysfs class in /sys/class/leds.  You'll
+ 	  need this to do anything useful with LEDs.  If unsure, say N.
+diff --git a/drivers/media/Kconfig b/drivers/media/Kconfig
+index 1570992..5f97923 100644
+--- a/drivers/media/Kconfig
++++ b/drivers/media/Kconfig
+@@ -5,6 +5,7 @@
+ menuconfig MEDIA_SUPPORT
+ 	tristate "Multimedia support"
+ 	depends on HAS_IOMEM
++	default m
+ 	help
+ 	  If you want to use Webcams, Video grabber devices and/or TV devices
+ 	  enable this option and other options below.
+diff --git a/drivers/media/usb/uvc/Kconfig b/drivers/media/usb/uvc/Kconfig
+index 6ed85ef..0975903 100644
+--- a/drivers/media/usb/uvc/Kconfig
++++ b/drivers/media/usb/uvc/Kconfig
+@@ -1,5 +1,6 @@
+ config USB_VIDEO_CLASS
+ 	tristate "USB Video Class (UVC)"
++	default m
+ 	depends on VIDEO_V4L2
+ 	select VIDEOBUF2_VMALLOC
+ 	---help---
+diff --git a/sound/Kconfig b/sound/Kconfig
+index 5a240e0..0c64350 100644
+--- a/sound/Kconfig
++++ b/sound/Kconfig
+@@ -1,5 +1,6 @@
+ menuconfig SOUND
+ 	tristate "Sound card support"
++	default m
+ 	depends on HAS_IOMEM
+ 	help
+ 	  If you have a sound card in your computer, i.e. if it can say more
+@@ -27,7 +28,7 @@ if SOUND
+ 
+ config SOUND_OSS_CORE
+ 	bool
+-	default n
++	default m
+ 
+ config SOUND_OSS_CORE_PRECLAIM
+ 	bool "Preclaim OSS device numbers"
+@@ -60,6 +61,7 @@ if !M68K && !UML
+ 
+ menuconfig SND
+ 	tristate "Advanced Linux Sound Architecture"
++	default m
+ 	help
+ 	  Say 'Y' or 'M' to enable ALSA (Advanced Linux Sound Architecture),
+ 	  the new base sound system.
+diff --git a/sound/core/Kconfig b/sound/core/Kconfig
+index 313f22e..f4144f5 100644
+--- a/sound/core/Kconfig
++++ b/sound/core/Kconfig
+@@ -1,9 +1,11 @@
+ # ALSA soundcard-configuration
+ config SND_TIMER
+ 	tristate
++	default m
+ 
+ config SND_PCM
+ 	tristate
++	default m
+ 	select SND_TIMER
+ 
+ config SND_DMAENGINE_PCM
+@@ -27,6 +29,7 @@ config SND_JACK
+ config SND_SEQUENCER
+ 	tristate "Sequencer support"
+ 	select SND_TIMER
++	default m
+ 	help
+ 	  Say Y or M to enable MIDI sequencer and router support.  This
+ 	  feature allows routing and enqueueing of MIDI events.  Events
+-- 
+2.7.4
+
