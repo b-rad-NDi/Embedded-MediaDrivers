@@ -73,8 +73,8 @@ while getopts ":d:ibB:cC:gG:" o; do
 		;;
 	h|*)
 		echo "supported devices:"
-		for i in `ls configs/` ; do
-			echo -e "\t${i/.conf/}"
+		for i in `ls configs/*.conf | sort` ; do
+			echo -e "\t`basename ${i/.conf/}`"
 		done
 		exit 0
 	esac
