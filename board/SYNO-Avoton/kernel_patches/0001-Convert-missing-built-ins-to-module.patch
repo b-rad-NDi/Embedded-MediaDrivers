@@ -1,0 +1,58 @@
+From e59c31fa1f2c839b50bb748687a9980eea9b4459 Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Wed, 15 May 2019 15:46:57 -0500
+Subject: [PATCH 1/4] Convert missing built-ins to module
+
+---
+ drivers/base/Kconfig   |  4 ++--
+ drivers/base/dma-buf.c | 10 ++++++++--
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/base/Kconfig b/drivers/base/Kconfig
+index 07abd9d..de95dfe 100644
+--- a/drivers/base/Kconfig
++++ b/drivers/base/Kconfig
+@@ -193,8 +193,8 @@ config SOC_BUS
+ source "drivers/base/regmap/Kconfig"
+ 
+ config DMA_SHARED_BUFFER
+-	bool
+-	default n
++	tristate
++	default m
+ 	select ANON_INODES
+ 	help
+ 	  This option enables the framework for buffer-sharing between
+diff --git a/drivers/base/dma-buf.c b/drivers/base/dma-buf.c
+index 1a82350..bb2a049 100644
+--- a/drivers/base/dma-buf.c
++++ b/drivers/base/dma-buf.c
+@@ -29,6 +29,7 @@
+ #include <linux/export.h>
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
++#include <linux/module.h>
+ 
+ static inline int is_dma_buf_file(struct file *);
+ 
+@@ -699,10 +700,15 @@ static int __init dma_buf_init(void)
+ 	dma_buf_init_debugfs();
+ 	return 0;
+ }
+-subsys_initcall(dma_buf_init);
++//subsys_initcall(dma_buf_init);
++module_init(dma_buf_init);
+ 
+ static void __exit dma_buf_deinit(void)
+ {
+ 	dma_buf_uninit_debugfs();
+ }
+-__exitcall(dma_buf_deinit);
++//__exitcall(dma_buf_deinit);
++module_exit(dma_buf_deinit);
++
++MODULE_LICENSE("GPL");
++
+-- 
+2.7.4
+

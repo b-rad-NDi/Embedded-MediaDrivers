@@ -1,0 +1,32 @@
+From 8d85a7193c0e0d2d6b7af5949f63766a7497ce58 Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Wed, 15 May 2019 15:47:59 -0500
+Subject: [PATCH 4/4] minimum required config for media tree
+
+---
+ synoconfigs/avoton | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/synoconfigs/avoton b/synoconfigs/avoton
+index c404361..81ecff5 100644
+--- a/synoconfigs/avoton
++++ b/synoconfigs/avoton
+@@ -1588,7 +1588,6 @@ CONFIG_FW_LOADER_USER_HELPER=y
+ # CONFIG_GENERIC_CPU_DEVICES is not set
+ CONFIG_REGMAP=y
+ CONFIG_REGMAP_I2C=y
+-# CONFIG_DMA_SHARED_BUFFER is not set
+ 
+ #
+ # Bus devices
+@@ -2636,7 +2635,6 @@ CONFIG_LPC_ICH=y
+ # CONFIG_MFD_WM8350_I2C is not set
+ # CONFIG_MFD_WM8994 is not set
+ # CONFIG_REGULATOR is not set
+-# CONFIG_MEDIA_SUPPORT is not set
+ 
+ #
+ # Graphics support
+-- 
+2.7.4
+

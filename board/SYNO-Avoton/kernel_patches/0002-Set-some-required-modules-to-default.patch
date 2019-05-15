@@ -1,0 +1,36 @@
+From 1c3da036f53d7a0f208ebd5da593f2cc418e6a9d Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Wed, 15 May 2019 15:47:21 -0500
+Subject: [PATCH 2/4] Set some required modules to default
+
+---
+ drivers/media/Kconfig         | 1 +
+ drivers/media/usb/uvc/Kconfig | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/drivers/media/Kconfig b/drivers/media/Kconfig
+index 8270388..2928335 100644
+--- a/drivers/media/Kconfig
++++ b/drivers/media/Kconfig
+@@ -4,6 +4,7 @@
+ 
+ menuconfig MEDIA_SUPPORT
+ 	tristate "Multimedia support"
++	default m
+ 	depends on HAS_IOMEM
+ 	help
+ 	  If you want to use Webcams, Video grabber devices and/or TV devices
+diff --git a/drivers/media/usb/uvc/Kconfig b/drivers/media/usb/uvc/Kconfig
+index 541c9f1..d85ba1a 100644
+--- a/drivers/media/usb/uvc/Kconfig
++++ b/drivers/media/usb/uvc/Kconfig
+@@ -1,5 +1,6 @@
+ config USB_VIDEO_CLASS
+ 	tristate "USB Video Class (UVC)"
++	default m
+ 	select VIDEOBUF2_VMALLOC
+ 	---help---
+ 	  Support for the USB Video Class (UVC).  Currently only video
+-- 
+2.7.4
+

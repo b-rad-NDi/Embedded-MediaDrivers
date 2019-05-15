@@ -1,0 +1,25 @@
+From 5862d1108de6ecb821c8bff0c37924f61b292d40 Mon Sep 17 00:00:00 2001
+From: Brad Love <brad@nextdimension.cc>
+Date: Wed, 15 May 2019 15:47:38 -0500
+Subject: [PATCH 3/4] Turn off tagged build, modinfo must match
+
+---
+ scripts/setlocalversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/setlocalversion b/scripts/setlocalversion
+index a469789..dabbfa6 100755
+--- a/scripts/setlocalversion
++++ b/scripts/setlocalversion
+@@ -14,7 +14,7 @@ usage() {
+ 	exit 1
+ }
+ 
+-scm_only=false
++scm_only=true
+ srctree=.
+ if test "$1" = "--save-scmversion"; then
+ 	scm_only=true
+-- 
+2.7.4
+
