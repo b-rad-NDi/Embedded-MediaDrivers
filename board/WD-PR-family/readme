@@ -4,3 +4,8 @@ This includes:
 - PR2100
 - PR4100
 
+
+Kernel modifications:
+- missing REGMAP, REGMAP_I2C, DMA_SHARED_BUFFER converted from built-in to module
+- I2C_MUX, I2C_ALGOBIT, MEDIA_SUPPORT, SOUND, SND, SND_PCM, LEDS_CLASS modules enabled
+

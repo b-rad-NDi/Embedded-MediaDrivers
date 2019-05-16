@@ -5,3 +5,7 @@ This includes:
 - EX4100
 - EX2Ultra
 
+Kernel modifications:
+- missing REGMAP, REGMAP_I2C, DMA_SHARED_BUFFER converted from built-in to module
+- I2C_MUX, MEDIA_SUPPORT, SOUND, SND, SND_PCM, LEDS_CLASS modules enabled
+

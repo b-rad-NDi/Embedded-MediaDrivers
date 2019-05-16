@@ -13,3 +13,7 @@ This includes:
 - DS415+
 
 
+Kernel modifications:
+- missing DMA_SHARED_BUFFER converted from built-in to module
+- MEDIA_SUPPORT, USB_VIDEO_CLASS modules enabled
+
